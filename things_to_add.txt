@@ -1,0 +1,1 @@
+1) Upload the avatar and cover images to specific folder or if folder is not existing creating new folder in cloudinary.
