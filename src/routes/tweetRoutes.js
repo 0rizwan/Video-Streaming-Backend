@@ -14,4 +14,8 @@
 // router.route("/user/:userId").get(getUserTweets);
 // router.route("/:tweetId").patch(updateTweet).delete(deleteTweet);
 
-// export default router
+import { Router} from 'express';
+
+const router = Router();
+
+export default router

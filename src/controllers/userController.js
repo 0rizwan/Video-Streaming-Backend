@@ -3,10 +3,9 @@ import { User } from "../models/userModel.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { genAccessAndRefreshTokens } from "../utils/tokens.js";
 import { cookieOptions } from '../constants.js';
-import { urlencoded } from 'express';
 
 export const registerUser = asyncHandler(async (req, res) => {
     // Fields validation - fields should not be empty
@@ -34,8 +33,8 @@ export const registerUser = asyncHandler(async (req, res) => {
     }
 
     // Uploading files to cloudinary
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+    const avatar = await uploadOnCloudinary(avatarLocalPath, "Avatar")
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath, "Cover Image")
     if (!avatar) {
         throw new ApiError(400, "Avatar is required")
     }
@@ -173,8 +172,8 @@ export const updateUserAccount = asyncHandler(async (req, res) => {
     }
 
     const fieldsToUpdate = {};
-    if (fullname) fieldsToUpdate.fullname;
-    if (email) fieldsToUpdate.email;
+    if (fullname) fieldsToUpdate.fullname = fullname;
+    if (email) fieldsToUpdate.email = email;
 
     const user = await User.findByIdAndUpdate(
         req.user._id,
@@ -204,7 +203,7 @@ export const changeUserAvatar = asyncHandler(async (req, res) => {
     if (!newAvatarLocalPath) {
         throw new ApiError(400, "Avatar is required");
     }
-    const newAvatar = await uploadOnCloudinary(newAvatarLocalPath);
+    const newAvatar = await uploadOnCloudinary(newAvatarLocalPath, "Avatar");
     if (!newAvatar.url) {
         throw new ApiError(400, "Error while uploading avatar to cloudinary")
     }
@@ -220,6 +219,11 @@ export const changeUserAvatar = asyncHandler(async (req, res) => {
             new: true
         }
     ).select("-password -refreshToken");
+
+    let segments = req.user.avatar.split('/');
+    let publicId = segments[segments.length - 1].split('.')[0];
+    await deleteFromCloudinary(`Videotube/Avatar/${publicId}`);
+
     return res
         .status(200)
         .json(new ApiResponse(200, user, "Avatar image updated"));
@@ -231,7 +235,7 @@ export const changeUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Cover image is required");
     }
 
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath, "Cover Image");
     if (!coverImage.url) {
         throw new ApiError(400, "Error while uploading cover image to cloudinary")
     }
@@ -247,6 +251,11 @@ export const changeUserCoverImage = asyncHandler(async (req, res) => {
             new: true
         }
     ).select("-password -refreshToken");
+
+    let segments = req.user.avatar.split('/');
+    let publicId = segments[segments.length - 1].split('.')[0];
+    await deleteFromCloudinary(`Videotube/Cover Image/${publicId}`);
+
     return res
         .status(200)
         .json(new ApiResponse(200, user, "Cover image updated"));
@@ -366,5 +375,12 @@ export const getWatchHistory = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user[0].watchHistory, "Watch History fetched successfully!"));
 })
 
+export const deleteUserAccount = asyncHandler(async (req, res) => {
+    const user = await User.findByIdAndDelete(req.user._id);
+    console.log(user)
+    return res
+        .status(200)
+        .json(new ApiResponse(204, {}, "User account deleted"))
+})
 
 

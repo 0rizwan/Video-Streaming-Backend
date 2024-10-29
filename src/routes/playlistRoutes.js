@@ -27,4 +27,8 @@
 
 // router.route("/user/:userId").get(getUserPlaylists);
 
-// export default router
+import { Router} from 'express';
+
+const router = Router();
+
+export default router
