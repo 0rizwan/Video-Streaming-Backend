@@ -222,7 +222,7 @@ export const changeUserAvatar = asyncHandler(async (req, res) => {
 
     let segments = req.user.avatar.split('/');
     let publicId = segments[segments.length - 1].split('.')[0];
-    await deleteFromCloudinary(`Videotube/Avatar/${publicId}`);
+    await deleteFromCloudinary(`Videotube/Avatar/${publicId}`, "image");
 
     return res
         .status(200)
@@ -254,7 +254,7 @@ export const changeUserCoverImage = asyncHandler(async (req, res) => {
 
     let segments = req.user.avatar.split('/');
     let publicId = segments[segments.length - 1].split('.')[0];
-    await deleteFromCloudinary(`Videotube/Cover Image/${publicId}`);
+    await deleteFromCloudinary(`Videotube/Cover Image/${publicId}`, "image");
 
     return res
         .status(200)

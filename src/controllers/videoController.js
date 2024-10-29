@@ -97,7 +97,7 @@ export const updateVideo = asyncHandler(async (req, res) => {
 
     let segments = video.thumbnail.split('/');
     let thumbnailPublicId = segments[segments.length - 1].split('.')[0];
-    await deleteFromCloudinary(`Videotube/Thumbnails/${thumbnailPublicId}`);
+    await deleteFromCloudinary(`Videotube/Thumbnails/${thumbnailPublicId}`, "image");
 
     const updatedVideo = await Video.findById(videoId);
 
@@ -122,14 +122,26 @@ export const deleteVideo = asyncHandler(async (req, res) => {
     let segments = video.thumbnail.split('/');
     let thumbnailPublicId = segments[segments.length - 1].split('.')[0];
 
-    let publicIds = [`Videotube/Videos/${videoPublicId}`, `Videotube/Thumbnails/${thumbnailPublicId}`]
-    await deleteMultipleFromCloudinary(publicIds);
+    await deleteFromCloudinary(`Videotube/Videos/${videoPublicId}`, "video");
+    await deleteFromCloudinary(`Videotube/Thumbnails/${thumbnailPublicId}`, "image");
 
     return res
         .status(200)
-        .json(new ApiResponse(204, {}, "Video deleted"))
+        .json(new ApiResponse(204, {}, "Video deleted"));
 })
 
 export const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
+    const { videoId } = req.params;
+
+    const video = await Video.findById(videoId);
+    if (!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    video.isPublished = !video.isPublished;
+    await video.save();
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, video, "Publish status toggled"))
 })
