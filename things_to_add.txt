@@ -1,3 +1,4 @@
 1) Upload the avatar and cover images to specific folder or if folder is not existing creating new folder in cloudinary - Done
 2) Returning user response while registering and login user, without password and refreshToken - Done
 3) Delete old image after changing the avatar or cover image - Done
+4) Deprecation warning while converting string to mongoose objectId - Done
