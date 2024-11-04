@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Video } from '../models/videoModel.js';
-import { deleteFromCloudinary, deleteMultipleFromCloudinary, getThumbnail, uploadOnCloudinary } from '../utils/cloudinary.js';
+import { deleteFromCloudinary, getThumbnail, uploadOnCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import mongoose from "mongoose";
@@ -90,6 +90,7 @@ export const getVideoById = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             username: 1,
+                            fullname: 1,
                             avatar: 1,
                             subscribers: 1
                         }

@@ -74,7 +74,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid user credentials");
     }
     const { accessToken, refreshToken } = await genAccessAndRefreshTokens(user._id);
-    const { password: _, ...userWithoutPassword } = user.toObject();
+    const { password: _, refreshToken: __, ...userWithoutPassword } = user.toObject();
 
     return res
         .status(200)
@@ -160,9 +160,10 @@ export const changeUserPassword = asyncHandler(async (req, res) => {
 })
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("-password -refreshToken");
     return res
         .status(200)
-        .json(new ApiResponse(200, req.user, "Current user fetched"))
+        .json(new ApiResponse(200, user, "Current user fetched"))
 })
 
 export const updateUserAccount = asyncHandler(async (req, res) => {
